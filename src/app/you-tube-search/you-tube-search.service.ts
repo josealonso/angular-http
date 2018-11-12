@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@angular/core';
 import { HttpClient, HttpRequest, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-// import { map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { SearchResult } from './search-result.model';
 
@@ -27,7 +27,9 @@ export class YouTubeSearchService  {
           `maxResults=10`
       ].join('&');
       const queryUrl = `${this.apiUrl}?${params}`;
-      return this.http.get(queryUrl).map(response => {
+      // Source: https://stackoverflow.com/questions/50412389/property-map-does-not-exist-on-type-observable-after-upgrading-rxjs-to-6
+      return this.http.get(queryUrl).pipe(
+          map(response => {
           return <any>response['items'].map(item => {
               console.log("raw item", item);
               return new SearchResult({
@@ -37,6 +39,7 @@ export class YouTubeSearchService  {
                 thumbnailUrl: item.snippet.thumbnails.high.url
               });
           });
-      });
+      })
+      );
     }
 }
